@@ -1,5 +1,5 @@
 import React from "react";
-import { ActiveTool } from "../types";
+import { ActiveTool, Editor } from "../types";
 import { cn } from "@/lib/utils";
 import ToolSidebarHeader from "./tool-sidebar-header";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,11 +8,13 @@ import { Circle, Diamond, Square, Triangle } from "lucide-react";
 
 interface ShapeSidebarProps {
   activeTool: ActiveTool;
+  editor: Editor | undefined;
   onChangeActiveTool: (tool: ActiveTool) => void;
 }
 
 export default function ShapeSidebar({
   activeTool,
+  editor,
   onChangeActiveTool,
 }: ShapeSidebarProps) {
   const onClose = () => {
@@ -33,15 +35,15 @@ export default function ShapeSidebar({
       />
       <ScrollArea>
         <div className="grid grid-cols-3 gap-4 p-4">
-          <ShapeTool onClick={() => {}} icon={Circle} />
-          <ShapeTool onClick={() => {}} icon={Square} />
-          <ShapeTool onClick={() => {}} icon={Triangle} />
+          <ShapeTool onClick={() => editor?.addCircle()} icon={Circle} />
+          <ShapeTool onClick={() => editor?.addSoftRectangle()} icon={Square} />
+          <ShapeTool onClick={() => editor?.addTriangle()} icon={Triangle} />
           <ShapeTool
-            onClick={() => {}}
+            onClick={() => editor?.addInverseTriangle()}
             icon={Triangle}
             iconClassName="rotate-180"
           />
-          <ShapeTool onClick={() => {}} icon={Diamond} />
+          <ShapeTool onClick={() => editor?.addDiamond()} icon={Diamond} />
         </div>
       </ScrollArea>
     </aside>
