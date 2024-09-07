@@ -19,6 +19,12 @@ export type ActiveTool =
 
 export type BuildEditorProps = {
   canvas: fabric.Canvas;
+  fillColor: string;
+  strokeColor: string;
+  strokeWidth: number;
+  setFillColor: (val: string) => void;
+  setStrokeColor: (val: string) => void;
+  setStrokeWidth: (val: number) => void;
 };
 
 export const FILL_COLOR = "rgba(0,0,0,1)";
@@ -68,9 +74,16 @@ export const RHOMBUS_OPTIONS = {
 };
 
 export interface Editor {
+  changeFillColor: (val: string) => void;
+  changeStrokeColor: (val: string) => void;
+  changeStrokeWidth: (val: number) => void;
   addCircle: () => void;
   addSoftRectangle: () => void;
   addTriangle: () => void;
   addInverseTriangle: () => void;
   addDiamond: () => void;
+  fillColor: string;
+  strokeColor: string;
+  strokeWidth: number;
+  canvas: fabric.Canvas;
 }

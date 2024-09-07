@@ -5,17 +5,30 @@ import {
   BuildEditorProps,
   CIRCLE_OPTIONS,
   Editor,
+  FILL_COLOR,
   RECTANGLE_OPTIONS,
   RHOMBUS_OPTIONS,
+  STROKE_COLOR,
+  STROKE_WIDTH,
   TRIANGLE_OPTIONS,
 } from "@/components/features/types";
+import { useCanvasEvents } from "./use-canvas-events";
+import { isTypeText } from "@/lib/utils";
 
 interface UseEditorProps {
   initialCanvas: fabric.Canvas;
   initialContainer: HTMLDivElement;
 }
 
-const buildEditor = ({ canvas }: BuildEditorProps): Editor => {
+const buildEditor = ({
+  canvas,
+  fillColor,
+  setFillColor,
+  strokeColor,
+  setStrokeColor,
+  strokeWidth,
+  setStrokeWidth,
+}: BuildEditorProps): Editor => {
   const getWorkspace = () => {
     return canvas.getObjects().findLast((object) => object.name == "clip");
   };
@@ -33,7 +46,30 @@ const buildEditor = ({ canvas }: BuildEditorProps): Editor => {
     canvas.add(object);
     canvas.setActiveObject(object);
   };
+
   return {
+    changeFillColor: (value: string) => {
+      setFillColor(value);
+      canvas.getActiveObjects().forEach((object) => {
+        object.set({ fill: value });
+      });
+    },
+    changeStrokeColor: (value: string) => {
+      setStrokeColor(value);
+      canvas.getActiveObjects().forEach((object) => {
+        if (isTypeText(object.type)) {
+          object.set({ fill: value });
+          return;
+        }
+        object.set({ stroke: value });
+      });
+    },
+    changeStrokeWidth: (value: number) => {
+      setStrokeWidth(value);
+      canvas.getActiveObjects().forEach((object) => {
+        object.set({ strokeWidth: value });
+      });
+    },
     addCircle: () => {
       const object = new fabric.Circle({
         ...CIRCLE_OPTIONS,
@@ -73,7 +109,7 @@ const buildEditor = ({ canvas }: BuildEditorProps): Editor => {
         [
           { x: RHOMBUS_OPTIONS.width / 2, y: 0 },
           { x: RHOMBUS_OPTIONS.width, y: RHOMBUS_OPTIONS.height / 2 },
-          { x: RHOMBUS_OPTIONS.width/2, y: RHOMBUS_OPTIONS.height },
+          { x: RHOMBUS_OPTIONS.width / 2, y: RHOMBUS_OPTIONS.height },
           { x: 0, y: RHOMBUS_OPTIONS.height / 2 },
         ],
         {
@@ -82,21 +118,39 @@ const buildEditor = ({ canvas }: BuildEditorProps): Editor => {
       );
       addToCanvas(object);
     },
+    fillColor,
+    strokeColor,
+    strokeWidth,
+    canvas,
   };
 };
 
 export const useEditor = () => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const [selectedObject, setSelectedObjects] = useState<fabric.Object[]>([]);
+
+  const [fillColor, setFillColor] = useState(FILL_COLOR);
+  const [strokeColor, setStrokeColor] = useState(STROKE_COLOR);
+  const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTH);
 
   useAutoResize({ canvas, container });
+  useCanvasEvents({ canvas, container, setSelectedObjects });
 
   const editor = useMemo(() => {
     if (canvas) {
-      return buildEditor({ canvas });
+      return buildEditor({
+        canvas,
+        fillColor,
+        setFillColor,
+        strokeColor,
+        setStrokeColor,
+        strokeWidth,
+        setStrokeWidth,
+      });
     }
     return undefined;
-  }, [canvas]);
+  }, [canvas, fillColor, strokeColor, strokeWidth]);
 
   const init = useCallback(
     ({ initialCanvas, initialContainer }: UseEditorProps) => {

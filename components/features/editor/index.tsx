@@ -60,7 +60,12 @@ export default function Editor() {
           onChangeActiveTool={onchangeActiveTool}
         />
         <main className="bg-muted flex-1 overflow-auto relative flex flex-col">
-          <Toolbar />
+          <Toolbar 
+            editor={editor}
+            activeTool={activeTool}
+            onChangeActiveTool={onchangeActiveTool}
+            key={JSON.stringify(editor?.canvas?.getActiveObject())}
+          />
           <div
             className="flex-1 h-[calc(100%-124px)] bg-red-100"
             ref={containerRef}
