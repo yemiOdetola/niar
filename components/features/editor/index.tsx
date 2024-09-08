@@ -7,16 +7,24 @@ import Navbar from "./navbar";
 import Sidebar from "./sidebar";
 import Toolbar from "./toolbar";
 import Footer from "./footer";
-import { ActiveTool } from "../types";
+import { ActiveTool, selectionDependentTools } from "../types";
 import ShapeSidebar from "./shape-sidebar";
 import FillColorSidebar from "./fill-color-sidebar";
 
 export default function Editor() {
-  const { init, editor } = useEditor();
-
   const [activeTool, setActiveTool] = useState<ActiveTool>("select");
   const canvasRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const onClearSelection = useCallback(() => {
+    if (selectionDependentTools.includes(activeTool)) {
+      setActiveTool("select");
+    }
+  }, [activeTool]);
+
+  const { init, editor } = useEditor({
+    clearSelectionCallback: onClearSelection,
+  });
 
   useEffect(() => {
     const canvas = new fabric.Canvas(canvasRef.current, {

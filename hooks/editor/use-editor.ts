@@ -5,6 +5,7 @@ import {
   BuildEditorProps,
   CIRCLE_OPTIONS,
   Editor,
+  EditorHookProps,
   FILL_COLOR,
   RECTANGLE_OPTIONS,
   RHOMBUS_OPTIONS,
@@ -28,7 +29,7 @@ const buildEditor = ({
   setStrokeColor,
   strokeWidth,
   setStrokeWidth,
-  selectedObjects,
+  selectedObjects
 }: BuildEditorProps): Editor => {
   const getWorkspace = () => {
     return canvas.getObjects().findLast((object) => object.name == "clip");
@@ -137,7 +138,13 @@ const buildEditor = ({
       );
       addToCanvas(object);
     },
-    fillColor,
+    getActiveFillColor: () => {
+      const selectedObject = selectedObjects[0];
+      if (!selectedObject) return fillColor;
+
+      const value = selectedObject.get('fill') || fillColor;
+      return value as string;
+    },
     strokeColor,
     strokeWidth,
     canvas,
@@ -145,7 +152,7 @@ const buildEditor = ({
   };
 };
 
-export const useEditor = () => {
+export const useEditor = ({clearSelectionCallback}: EditorHookProps) => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<fabric.Object[]>([]);
@@ -155,7 +162,7 @@ export const useEditor = () => {
   const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTH);
 
   useAutoResize({ canvas, container });
-  useCanvasEvents({ canvas, container, setSelectedObjects });
+  useCanvasEvents({ canvas, container, setSelectedObjects, clearSelectionCallback });
 
   const editor = useMemo(() => {
     if (canvas) {
