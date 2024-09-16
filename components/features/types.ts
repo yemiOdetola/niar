@@ -2,6 +2,54 @@ import { fabric } from "fabric";
 import { ITextboxOptions } from "fabric/fabric-impl";
 import * as material from "material-colors";
 
+
+export const filters = [
+  "none",
+  "polaroid",
+  "sepia",
+  "kodachrome",
+  "contrast",
+  "brightness",
+  "greyscale",
+  "brownie",
+  "vintage",
+  "technicolor",
+  "pixelate",
+  "invert",
+  "blur",
+  "sharpen",
+  "emboss",
+  "removecolor",
+  "blacknwhite",
+  "vibrance",
+  "blendcolor",
+  "huerotate",
+  "resize",
+  "saturation",
+  "gamma",
+];
+
+export const fonts = [
+  "Arial",
+  "Arial Black",
+  "Verdana",
+  "Helvetica",
+  "Tahoma",
+  "Trebuchet MS",
+  "Times New Roman",
+  "Georgia",
+  "Garamond",
+  "Courier New",
+  "Brush Script MT",
+  "Palatino",
+  "Bookman",
+  "Comic Sans MS",
+  "Impact",
+  "Lucida Sans Unicode",
+  "Geneva",
+  "Lucida Console",
+];
+
 export const selectionDependentTools = [
   "fill",
   "font",
@@ -55,6 +103,18 @@ export interface EditorHookProps {
   clearSelectionCallback?: () => void;
 }
 
+export interface EditorHookProps {
+  defaultState?: string;
+  defaultWidth?: number;
+  defaultHeight?: number;
+  clearSelectionCallback?: () => void;
+  saveCallback?: (values: {
+    json: string;
+    height: number;
+    width: number;
+  }) => void;
+};
+
 export type BuildEditorProps = {
   // undo: () => void;
   // redo: () => void;
@@ -64,6 +124,7 @@ export type BuildEditorProps = {
   // autoZoom: () => void;
   // copy: () => void;
   // paste: () => void;
+  fontFamily: string;
   canvas: fabric.Canvas;
   fillColor: string;
   strokeColor: string;
@@ -158,20 +219,20 @@ export interface Editor {
   // onPaste: () => void;
   // changeImageFilter: (value: string) => void;
   // addImage: (value: string) => void;
-  // delete: () => void;
-  // changeFontSize: (value: number) => void;
-  // getActiveFontSize: () => number;
-  // changeTextAlign: (value: string) => void;
-  // getActiveTextAlign: () => string;
-  // changeFontUnderline: (value: boolean) => void;
-  // getActiveFontUnderline: () => boolean;
-  // changeFontLinethrough: (value: boolean) => void;
-  // getActiveFontLinethrough: () => boolean;
-  // changeFontStyle: (value: string) => void;
-  // getActiveFontStyle: () => string;
+  delete: () => void;
+  changeFontSize: (value: number) => void;
+  getActiveFontSize: () => number;
+  changeTextAlign: (value: string) => void;
+  getActiveTextAlign: () => string;
+  changeFontUnderline: (value: boolean) => void;
+  getActiveFontUnderline: () => boolean;
+  changeFontLinethrough: (value: boolean) => void;
+  getActiveFontLinethrough: () => boolean;
+  changeFontStyle: (value: string) => void;
+  getActiveFontStyle: () => string;
   changeFontWeight: (value: number) => void;
-  // getActiveFontWeight: () => number;
-  // getActiveFontFamily: () => string;
+  getActiveFontWeight: () => number;
+  getActiveFontFamily: () => string;
   changeFontFamily: (value: string) => void;
   addText: (value: string, options?: ITextboxOptions) => void;
   getActiveOpacity: () => number;

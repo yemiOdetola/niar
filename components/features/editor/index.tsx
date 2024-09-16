@@ -13,6 +13,8 @@ import FillColorSidebar from "./fill-color-sidebar";
 import StrokeColorSidebar from "./stroke-color-sidebar";
 import StrokeWidthSidebar from "./stroke-width-sidebar";
 import { OpacitySidebar } from "./opacity-sidebar";
+import { TextSidebar } from "./text-sidebar";
+import { FontSidebar } from "./font-sidebar";
 
 export default function Editor() {
   const [activeTool, setActiveTool] = useState<ActiveTool>("select");
@@ -41,7 +43,7 @@ export default function Editor() {
     };
   }, [init]);
 
-  const onchangeActiveTool = useCallback(
+  const onChangeActiveTool = useCallback(
     (tool: ActiveTool) => {
       if (tool == activeTool) {
         return setActiveTool("select");
@@ -60,42 +62,53 @@ export default function Editor() {
 
   return (
     <div className="h-full flex flex-col">
-      <Navbar activeTool={activeTool} onChangeActiveTool={onchangeActiveTool} />
+      <Navbar activeTool={activeTool} onChangeActiveTool={onChangeActiveTool} />
       <div className="absolute h-[calc(100%-68px)] w-full top-[68px] flex">
         <Sidebar
           activeTool={activeTool}
-          onChangeActiveTool={onchangeActiveTool}
+          onChangeActiveTool={onChangeActiveTool}
         />
         <ShapeSidebar
           editor={editor}
           activeTool={activeTool}
-          onChangeActiveTool={onchangeActiveTool}
+          onChangeActiveTool={onChangeActiveTool}
         />
         <FillColorSidebar
           editor={editor}
           activeTool={activeTool}
-          onChangeActiveTool={onchangeActiveTool}
+          onChangeActiveTool={onChangeActiveTool}
         />
         <StrokeColorSidebar
           editor={editor}
           activeTool={activeTool}
-          onChangeActiveTool={onchangeActiveTool}
+          onChangeActiveTool={onChangeActiveTool}
         />
         <StrokeWidthSidebar
           editor={editor}
           activeTool={activeTool}
-          onChangeActiveTool={onchangeActiveTool}
+          onChangeActiveTool={onChangeActiveTool}
         />
         <OpacitySidebar
           editor={editor}
           activeTool={activeTool}
-          onChangeActiveTool={onchangeActiveTool}
+          onChangeActiveTool={onChangeActiveTool}
+        />
+
+        <TextSidebar
+          editor={editor}
+          activeTool={activeTool}
+          onChangeActiveTool={onChangeActiveTool}
+        />
+        <FontSidebar
+          editor={editor}
+          activeTool={activeTool}
+          onChangeActiveTool={onChangeActiveTool}
         />
         <main className="bg-muted flex-1 overflow-auto relative flex flex-col">
           <Toolbar
             editor={editor}
             activeTool={activeTool}
-            onChangeActiveTool={onchangeActiveTool}
+            onChangeActiveTool={onChangeActiveTool}
             key={JSON.stringify(editor?.canvas?.getActiveObject())}
           />
           <div
