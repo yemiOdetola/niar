@@ -1,4 +1,5 @@
 import { fabric } from "fabric";
+import { ITextboxOptions } from "fabric/fabric-impl";
 import * as material from "material-colors";
 
 export const selectionDependentTools = [
@@ -55,6 +56,14 @@ export interface EditorHookProps {
 }
 
 export type BuildEditorProps = {
+  // undo: () => void;
+  // redo: () => void;
+  // save: (skip?: boolean) => void;
+  // canUndo: () => boolean;
+  // canRedo: () => boolean;
+  // autoZoom: () => void;
+  // copy: () => void;
+  // paste: () => void;
   canvas: fabric.Canvas;
   fillColor: string;
   strokeColor: string;
@@ -62,12 +71,19 @@ export type BuildEditorProps = {
   setFillColor: (val: string) => void;
   setStrokeColor: (val: string) => void;
   setStrokeWidth: (val: number) => void;
+  setStrokeDashArray: (val: number[]) => void;
+  setFontFamily: (value: string) => void;
+  strokeDashArray: number[];
   selectedObjects: fabric.Object[];
 };
 
 export const FILL_COLOR = "rgba(0,0,0,1)";
 export const STROKE_COLOR = "rgba(0,0,0,1)";
 export const STROKE_WIDTH = 2;
+export const STROKE_DASH_ARRAY = [];
+export const FONT_FAMILY = "Arial";
+export const FONT_SIZE = 32;
+export const FONT_WEIGHT = 400;
 
 export const CIRCLE_OPTIONS = {
   radius: 50,
@@ -111,18 +127,70 @@ export const RHOMBUS_OPTIONS = {
   angle: 0,
 };
 
+export const TEXT_OPTIONS = {
+  type: "textbox",
+  left: 100,
+  top: 100,
+  fill: FILL_COLOR,
+  fontSize: FONT_SIZE,
+  fontFamily: FONT_FAMILY,
+};
+
 export interface Editor {
+  // savePng: () => void;
+  // saveJpg: () => void;
+  // saveSvg: () => void;
+  // saveJson: () => void;
+  // loadJson: (json: string) => void;
+  // onUndo: () => void;
+  // onRedo: () => void;
+  // canUndo: () => boolean;
+  // canRedo: () => boolean;
+  // autoZoom: () => void;
+  // zoomIn: () => void;
+  // zoomOut: () => void;
+  // getWorkspace: () => fabric.Object | undefined;
+  // changeBackground: (value: string) => void;
+  // changeSize: (value: { width: number; height: number }) => void;
+  // enableDrawingMode: () => void;
+  // disableDrawingMode: () => void;
+  // onCopy: () => void;
+  // onPaste: () => void;
+  // changeImageFilter: (value: string) => void;
+  // addImage: (value: string) => void;
+  // delete: () => void;
+  // changeFontSize: (value: number) => void;
+  // getActiveFontSize: () => number;
+  // changeTextAlign: (value: string) => void;
+  // getActiveTextAlign: () => string;
+  // changeFontUnderline: (value: boolean) => void;
+  // getActiveFontUnderline: () => boolean;
+  // changeFontLinethrough: (value: boolean) => void;
+  // getActiveFontLinethrough: () => boolean;
+  // changeFontStyle: (value: string) => void;
+  // getActiveFontStyle: () => string;
+  changeFontWeight: (value: number) => void;
+  // getActiveFontWeight: () => number;
+  // getActiveFontFamily: () => string;
+  changeFontFamily: (value: string) => void;
+  addText: (value: string, options?: ITextboxOptions) => void;
+  getActiveOpacity: () => number;
+  changeOpacity: (value: number) => void;
+  bringForward: () => void;
+  sendBackwards: () => void;
   changeFillColor: (val: string) => void;
   changeStrokeColor: (val: string) => void;
   changeStrokeWidth: (val: number) => void;
+  changeStrokeDashArray: (value: number[]) => void;
   addCircle: () => void;
   addSoftRectangle: () => void;
   addTriangle: () => void;
   addInverseTriangle: () => void;
   addDiamond: () => void;
   getActiveFillColor: () => string;
-  strokeColor: string;
-  strokeWidth: number;
+  getActiveStrokeColor: () => string;
+  getActiveStrokeWidth: () => number;
+  getActiveStrokeDashArray: () => number[];
   canvas: fabric.Canvas;
   selectedObjects: fabric.Object[];
 }

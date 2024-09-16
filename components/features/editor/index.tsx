@@ -10,6 +10,9 @@ import Footer from "./footer";
 import { ActiveTool, selectionDependentTools } from "../types";
 import ShapeSidebar from "./shape-sidebar";
 import FillColorSidebar from "./fill-color-sidebar";
+import StrokeColorSidebar from "./stroke-color-sidebar";
+import StrokeWidthSidebar from "./stroke-width-sidebar";
+import { OpacitySidebar } from "./opacity-sidebar";
 
 export default function Editor() {
   const [activeTool, setActiveTool] = useState<ActiveTool>("select");
@@ -69,6 +72,21 @@ export default function Editor() {
           onChangeActiveTool={onchangeActiveTool}
         />
         <FillColorSidebar
+          editor={editor}
+          activeTool={activeTool}
+          onChangeActiveTool={onchangeActiveTool}
+        />
+        <StrokeColorSidebar
+          editor={editor}
+          activeTool={activeTool}
+          onChangeActiveTool={onchangeActiveTool}
+        />
+        <StrokeWidthSidebar
+          editor={editor}
+          activeTool={activeTool}
+          onChangeActiveTool={onchangeActiveTool}
+        />
+        <OpacitySidebar
           editor={editor}
           activeTool={activeTool}
           onChangeActiveTool={onchangeActiveTool}
