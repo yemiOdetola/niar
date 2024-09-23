@@ -11,9 +11,14 @@ import {
   ArrowUp,
   Bold,
   ChevronDown,
+  Copy,
+  Filter,
   GitPullRequestClosedIcon,
   Italic,
+  ShieldQuestion,
+  ShieldQuestionIcon,
   SlidersHorizontal,
+  SquareSplitHorizontal,
   Strikethrough,
   Trash,
   Underline,
@@ -150,21 +155,26 @@ export default function Toolbar({
   return (
     <div className="shrink-0 h-[56px] border-b bg-white w-full flex items-center overflow-x-auto z-[49] gap-x-2">
       <div className="flex items-center justify-center h-full gap-x-2 pl-2">
-        <Hint label="Color" side="bottom" sideOffset={5}>
-          <Button
-            onClick={() => onChangeActiveTool("fill")}
-            size="icon"
-            variant="ghost"
-            className={cn(activeTool == "fill" && "bg-gray-100")}
-          >
-            <div
-              className="rounded-sm size-4 border"
-              style={{
-                backgroundColor: properties.fillColor,
-              }}
-            ></div>
-          </Button>
-        </Hint>
+        {!isImage && (
+          <div className="flex items-center h-full justify-center">
+            <Hint label="Color" side="bottom" sideOffset={5}>
+              <Button
+                onClick={() => onChangeActiveTool("fill")}
+                size="icon"
+                variant="ghost"
+                className={cn(activeTool == "fill" && "bg-gray-100")}
+              >
+                <div
+                  className="rounded-sm size-4 border"
+                  style={{
+                    backgroundColor: properties.fillColor,
+                  }}
+                ></div>
+              </Button>
+            </Hint>
+          </div>
+        )}
+
         {!isText && (
           <Hint label="Stroke color" side="bottom" sideOffset={5}>
             <Button
@@ -390,17 +400,62 @@ export default function Toolbar({
             />
           </div>
         )}
+
+        {isImage && (
+          <div className="flex items-center h-full justify-center">
+            <Hint label="Filters" side="bottom" sideOffset={5}>
+              <Button
+                onClick={() => onChangeActiveTool("filter")}
+                size="icon"
+                variant="ghost"
+                className={cn(activeTool === "filter" && "bg-gray-100")}
+              >
+                <ShieldQuestion className="size-4" />
+              </Button>
+            </Hint>
+          </div>
+        )}
+        {isImage && (
+          <div className="flex items-center h-full justify-center">
+            <Hint label="Remove background" side="bottom" sideOffset={5}>
+              <Button
+                onClick={() => onChangeActiveTool("remove-bg")}
+                size="icon"
+                variant="ghost"
+                className={cn(activeTool === "remove-bg" && "bg-gray-100")}
+              >
+                <SquareSplitHorizontal className="size-4" />
+              </Button>
+            </Hint>
+          </div>
+        )}
+
         <div className="flex items-center h-full justify-center">
-        <Hint label="Delete" side="bottom" sideOffset={5}>
-          <Button
-            onClick={() => editor?.delete()}
-            size="icon"
-            variant="ghost"
-          >
-            <Trash className="size-4" />
-          </Button>
-        </Hint>
-      </div>
+          <Hint label="Duplicate" side="bottom" sideOffset={5}>
+            <Button
+              onClick={() => {
+                editor?.onCopy();
+                editor?.onPaste();
+              }}
+              size="icon"
+              variant="ghost"
+            >
+              <Copy className="size-4" />
+            </Button>
+          </Hint>
+        </div>
+
+        <div className="flex items-center h-full justify-center">
+          <Hint label="Delete" side="bottom" sideOffset={5}>
+            <Button
+              onClick={() => editor?.delete()}
+              size="icon"
+              variant="ghost"
+            >
+              <Trash className="size-4" />
+            </Button>
+          </Hint>
+        </div>
       </div>
     </div>
   );

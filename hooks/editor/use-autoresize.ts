@@ -56,8 +56,7 @@ export const useAutoResize = ({ canvas, container }: UseAutoResizeProps) => {
     localWorkspace.clone((cloned: fabric.Rect) => {
       canvas.clipPath = cloned;
       canvas.requestRenderAll();
-    })
-
+    });
   }, [canvas, container]);
 
   useEffect(() => {
@@ -74,4 +73,6 @@ export const useAutoResize = ({ canvas, container }: UseAutoResizeProps) => {
       }
     };
   }, [autoZoom, canvas, container]);
+
+  return { autoZoom };
 };

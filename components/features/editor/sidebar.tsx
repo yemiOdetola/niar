@@ -5,6 +5,7 @@ import SidebarItem from "./sidebar-item";
 import {
   ImageIcon,
   LayoutTemplate,
+  Pencil,
   Settings,
   Shapes,
   Sparkles,
@@ -33,6 +34,11 @@ const tools: {label: any, id: ActiveTool, icon: LucideIcon}[] = [
     label: "Shapes",
     id: "shapes",
     icon: Shapes,
+  },
+  {
+    label: "Draw",
+    id: "draw",
+    icon: Pencil,
   },
   {
     label: "AI",

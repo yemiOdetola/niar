@@ -10,6 +10,7 @@ import {
   FONT_FAMILY,
   FONT_SIZE,
   FONT_WEIGHT,
+  JSON_KEYS,
   RECTANGLE_OPTIONS,
   RHOMBUS_OPTIONS,
   STROKE_COLOR,
@@ -19,7 +20,12 @@ import {
   TRIANGLE_OPTIONS,
 } from "@/components/features/types";
 import { useCanvasEvents } from "./use-canvas-events";
-import { isTypeText } from "@/lib/utils";
+import { createFilter, downloadFile, isTypeText, transformText } from "@/lib/utils";
+import { useClipboard } from "./use-clipboard";
+import { useHotkeys } from "./use-hotkeys";
+import { useLoadState } from "./use-load-state";
+import { useHistory } from "./use-history";
+import { useWindowEvents } from "./use-window-events";
 
 interface UseEditorProps {
   initialCanvas: fabric.Canvas;
@@ -27,19 +33,89 @@ interface UseEditorProps {
 }
 
 const buildEditor = ({
+  save,
+  undo,
+  redo,
+  canRedo,
+  canUndo,
+  autoZoom,
+  copy,
+  paste,
   canvas,
   fillColor,
+  fontFamily,
+  setFontFamily,
   setFillColor,
   strokeColor,
-  fontFamily,
   setStrokeColor,
   strokeWidth,
   setStrokeWidth,
   selectedObjects,
   strokeDashArray,
   setStrokeDashArray,
-  setFontFamily,
 }: BuildEditorProps): Editor => {
+
+  const generateSaveOptions = () => {
+    const { width, height, left, top } = getWorkspace() as fabric.Rect;
+
+    return {
+      name: "Image",
+      format: "png",
+      quality: 1,
+      width,
+      height,
+      left,
+      top,
+    };
+  };
+
+  const savePng = () => {
+    const options = generateSaveOptions();
+
+    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    const dataUrl = canvas.toDataURL(options);
+
+    downloadFile(dataUrl, "png");
+    autoZoom();
+  };
+
+  const saveSvg = () => {
+    const options = generateSaveOptions();
+
+    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    const dataUrl = canvas.toDataURL(options);
+
+    downloadFile(dataUrl, "svg");
+    autoZoom();
+  };
+
+  const saveJpg = () => {
+    const options = generateSaveOptions();
+
+    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    const dataUrl = canvas.toDataURL(options);
+
+    downloadFile(dataUrl, "jpg");
+    autoZoom();
+  };
+
+  const saveJson = async () => {
+    const dataUrl = canvas.toJSON(JSON_KEYS);
+
+    await transformText(dataUrl.objects);
+    const fileString = `data:text/json;charset=utf-8,${encodeURIComponent(
+      JSON.stringify(dataUrl, null, "\t"),
+    )}`;
+    downloadFile(fileString, "json");
+  };
+
+  const loadJson = (json: string) => {
+    const data = JSON.parse(json);
+
+    canvas.loadFromJSON(data, () => {
+      autoZoom();
+    });
+  };
 
   const getWorkspace = () => {
     return canvas.getObjects().findLast((object) => object.name == "clip");
@@ -60,6 +136,91 @@ const buildEditor = ({
   };
 
   return {
+    savePng,
+    saveJpg,
+    saveSvg,
+    saveJson,
+    loadJson,
+    canUndo,
+    canRedo,
+    autoZoom,
+    getWorkspace,
+    onUndo: () => undo(),
+    onRedo: () => redo(),
+    onCopy: () => copy(),
+    onPaste: () => paste(),
+    zoomIn: () => {
+      let zoomRatio = canvas.getZoom();
+      zoomRatio += 0.05;
+      const center = canvas.getCenter();
+      canvas.zoomToPoint(
+        new fabric.Point(center.left, center.top),
+        zoomRatio > 1 ? 1 : zoomRatio
+      );
+    },
+    zoomOut: () => {
+      let zoomRatio = canvas.getZoom();
+      zoomRatio -= 0.05;
+      const center = canvas.getCenter();
+      canvas.zoomToPoint(
+        new fabric.Point(center.left, center.top),
+        zoomRatio < 0.2 ? 0.2 : zoomRatio
+      );
+    },
+
+    enableDrawingMode: () => {
+      canvas.discardActiveObject();
+      canvas.renderAll();
+      canvas.isDrawingMode = true;
+      canvas.freeDrawingBrush.width = strokeWidth;
+      canvas.freeDrawingBrush.color = strokeColor;
+    },
+    disableDrawingMode: () => {
+      canvas.isDrawingMode = false;
+    },
+    changeSize: (value: { width: number; height: number }) => {
+      const workspace = getWorkspace();
+
+      workspace?.set(value);
+      autoZoom();
+      save();
+    },
+    changeBackground: (value: string) => {
+      const workspace = getWorkspace();
+      workspace?.set({ fill: value });
+      canvas.renderAll();
+      save();
+    },
+    changeImageFilter: (value: string) => {
+      const objects = canvas.getActiveObjects();
+      objects.forEach((object) => {
+        if (object.type === "image") {
+          const imageObject = object as fabric.Image;
+
+          const effect = createFilter(value);
+
+          imageObject.filters = effect ? [effect] : [];
+          imageObject.applyFilters();
+          canvas.renderAll();
+        }
+      });
+    },
+    addImage: (value: string) => {
+      fabric.Image.fromURL(
+        value,
+        (image) => {
+          const workspace = getWorkspace();
+
+          image.scaleToWidth(workspace?.width || 0);
+          image.scaleToHeight(workspace?.height || 0);
+
+          addToCanvas(image);
+        },
+        {
+          crossOrigin: "anonymous",
+        }
+      );
+    },
     delete: () => {
       canvas.getActiveObjects().forEach((object) => canvas.remove(object));
       canvas.discardActiveObject();
@@ -222,7 +383,7 @@ const buildEditor = ({
       });
       canvas.renderAll();
     },
-    
+
     getActiveOpacity: () => {
       const selectedObject = selectedObjects[0];
 
@@ -246,7 +407,7 @@ const buildEditor = ({
       });
 
       canvas.renderAll();
-      
+
       const workspace = getWorkspace();
       workspace?.sendToBack();
     },
@@ -273,8 +434,10 @@ const buildEditor = ({
           object.set({ fill: value });
           return;
         }
+
         object.set({ stroke: value });
       });
+      canvas.freeDrawingBrush.color = value;
       canvas.renderAll();
     },
     changeStrokeWidth: (value: number) => {
@@ -282,6 +445,7 @@ const buildEditor = ({
       canvas.getActiveObjects().forEach((object) => {
         object.set({ strokeWidth: value });
       });
+      canvas.freeDrawingBrush.width = value;
       canvas.renderAll();
     },
     changeStrokeDashArray: (value: number[]) => {
@@ -363,28 +527,28 @@ const buildEditor = ({
       const selectedObject = selectedObjects[0];
       if (!selectedObject) return fillColor;
 
-      const value = selectedObject.get('fill') || fillColor;
+      const value = selectedObject.get("fill") || fillColor;
       return value as string;
     },
     getActiveStrokeColor: () => {
       const selectedObject = selectedObjects[0];
       if (!selectedObject) return fillColor;
 
-      const value = selectedObject.get('stroke') || strokeColor;
+      const value = selectedObject.get("stroke") || strokeColor;
       return value;
     },
     getActiveStrokeWidth: () => {
       const selectedObject = selectedObjects[0];
       if (!selectedObject) return strokeWidth;
 
-      const value = selectedObject.get('strokeWidth') || strokeWidth;
+      const value = selectedObject.get("strokeWidth") || strokeWidth;
       return value;
     },
     getActiveStrokeDashArray: () => {
       const selectedObject = selectedObjects[0];
       if (!selectedObject) return strokeDashArray;
 
-      const value = selectedObject.get('strokeDashArray') || strokeDashArray;
+      const value = selectedObject.get("strokeDashArray") || strokeDashArray;
       return value;
     },
     canvas,
@@ -392,24 +556,74 @@ const buildEditor = ({
   };
 };
 
-export const useEditor = ({clearSelectionCallback}: EditorHookProps) => {
+export const useEditor = ({ clearSelectionCallback, saveCallback }: EditorHookProps) => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<fabric.Object[]>([]);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
 
   const [fontFamily, setFontFamily] = useState(FONT_FAMILY);
   const [fillColor, setFillColor] = useState(FILL_COLOR);
   const [strokeColor, setStrokeColor] = useState(STROKE_COLOR);
   const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTH);
-  const [strokeDashArray, setStrokeDashArray] = useState<number[]>(STROKE_DASH_ARRAY);
+  const [strokeDashArray, setStrokeDashArray] =
+    useState<number[]>(STROKE_DASH_ARRAY);
 
-  useAutoResize({ canvas, container });
-  useCanvasEvents({ canvas, container, setSelectedObjects, clearSelectionCallback });
+  useWindowEvents();
+
+  const { 
+    save, 
+    canRedo, 
+    canUndo, 
+    undo, 
+    redo,
+    canvasHistory,
+    setHistoryIndex,
+  } = useHistory({ 
+    canvas,
+    saveCallback
+  });
+
+  useCanvasEvents({
+    save,
+    canvas,
+    setSelectedObjects,
+    clearSelectionCallback,
+  });
+
+  const { copy, paste } = useClipboard({ canvas });
+
+  const { autoZoom } = useAutoResize({
+    canvas,
+    container,
+  });
+
+  useHotkeys({
+    undo,
+    redo,
+    copy,
+    paste,
+    save,
+    canvas,
+  });
+
+  // useLoadState({
+  //   canvas,
+  //   autoZoom,
+  //   initialState,
+  //   canvasHistory,
+  //   setHistoryIndex,
+  // });
 
   const editor = useMemo(() => {
     if (canvas) {
       return buildEditor({
+        save, 
+        canRedo, 
+        canUndo, 
+        undo, 
+        redo,
         canvas,
+        autoZoom,
         fillColor,
         fontFamily,
         setFillColor,
@@ -420,11 +634,13 @@ export const useEditor = ({clearSelectionCallback}: EditorHookProps) => {
         selectedObjects,
         strokeDashArray,
         setStrokeDashArray,
-        setFontFamily
+        setFontFamily,
+        copy,
+        paste,
       });
     }
     return undefined;
-  }, [canvas, fillColor, fontFamily, selectedObjects, strokeColor, strokeDashArray, strokeWidth]);
+  }, [canvas, save, canRedo, canUndo, undo, redo, autoZoom, fillColor, fontFamily, strokeColor, strokeWidth, selectedObjects, strokeDashArray, copy, paste]);
 
   const init = useCallback(
     ({ initialCanvas, initialContainer }: UseEditorProps) => {
@@ -462,18 +678,13 @@ export const useEditor = ({clearSelectionCallback}: EditorHookProps) => {
       setCanvas(initialCanvas);
       setContainer(initialContainer);
 
-      const test = new fabric.Rect({
-        width: 200,
-        height: 200,
-        fill: "black",
-        selectable: true,
-        hasControls: true,
-      });
-
-      initialCanvas.add(test);
-      initialCanvas.centerObject(test);
+      const currentState = JSON.stringify(
+        initialCanvas.toJSON(JSON_KEYS)
+      );
+      canvasHistory.current = [currentState];
+      setHistoryIndex(0);
     },
-    []
+    [canvasHistory, setHistoryIndex]
   );
 
   return { init, editor };

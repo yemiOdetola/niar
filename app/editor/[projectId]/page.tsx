@@ -1,6 +1,9 @@
-import Editor from "@/components/features/editor";
+import { Editor } from "@/components/features/editor";
+import { protectServer } from "@/lib/auth";
 import React from "react";
 
-export default function EditorProject() {
-  return <Editor />;
+export default async function EditorProject() {
+  await protectServer();
+
+  return <Editor initialData={""} />;
 }
