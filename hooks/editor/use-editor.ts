@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { fabric } from "fabric";
 import { useAutoResize } from "./use-autoresize";
 import {
@@ -556,7 +556,15 @@ const buildEditor = ({
   };
 };
 
-export const useEditor = ({ clearSelectionCallback, saveCallback }: EditorHookProps) => {
+export const useEditor = ({ clearSelectionCallback, saveCallback,   defaultState,
+  defaultHeight,
+  defaultWidth, }: EditorHookProps) => {
+
+  const initialState = useRef(defaultState);
+  const initialWidth = useRef(defaultWidth);
+  const initialHeight = useRef(defaultHeight);
+
+
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<fabric.Object[]>([]);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
@@ -606,13 +614,13 @@ export const useEditor = ({ clearSelectionCallback, saveCallback }: EditorHookPr
     canvas,
   });
 
-  // useLoadState({
-  //   canvas,
-  //   autoZoom,
-  //   initialState,
-  //   canvasHistory,
-  //   setHistoryIndex,
-  // });
+  useLoadState({
+    canvas,
+    autoZoom,
+    initialState,
+    canvasHistory,
+    setHistoryIndex,
+  });
 
   const editor = useMemo(() => {
     if (canvas) {
@@ -655,15 +663,14 @@ export const useEditor = ({ clearSelectionCallback, saveCallback }: EditorHookPr
       });
 
       const initialWorkspace = new fabric.Rect({
-        width: 700,
-        height: 900,
+        width: initialWidth.current,
+        height: initialHeight.current,
         name: "clip",
         fill: "white",
         selectable: false,
         hasControls: false,
-        hasBorders: true,
         shadow: new fabric.Shadow({
-          color: "rgba(0,0,0,0.1)",
+          color: "rgba(0,0,0,0.8)",
           blur: 5,
         }),
       });

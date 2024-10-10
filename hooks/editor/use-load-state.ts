@@ -1,7 +1,6 @@
+import { JSON_KEYS } from "@/components/features/types";
 import { fabric } from "fabric";
 import { useEffect, useRef } from "react";
-
-import { JSON_KEYS } from "@/features/editor/types";
 
 interface UseLoadStateProps {
   autoZoom: () => void;

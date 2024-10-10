@@ -1,5 +1,4 @@
-import { protectServer } from "@/features/auth/utils";
-
+import { protectServer } from "@/lib/auth";
 import { Banner } from "./banner";
 import { ProjectsSection } from "./projects-section";
 import { TemplatesSection } from "./templates-section";

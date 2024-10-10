@@ -18,7 +18,8 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 
-export const SignInCard = () => {
+export const 
+SignInCard = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
