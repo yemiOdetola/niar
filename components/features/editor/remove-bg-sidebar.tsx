@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRemoveBg } from "@/hooks/ai/use-remove-bg";
 import { Editor, ActiveTool } from "../types";
 import ToolSidebarHeader from "./tool-sidebar-header";
+import { usePaywall } from "@/features/subscriptions/hooks/use-paywall";
 
 interface RemoveBgSidebarProps {
   editor: Editor | undefined;

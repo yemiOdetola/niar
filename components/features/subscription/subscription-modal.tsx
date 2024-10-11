@@ -3,6 +3,9 @@
 import Image from "next/image";
 import { CheckCircle2 } from "lucide-react";
 
+import { useCheckout } from "@/features/subscriptions/api/use-checkout";
+import { useSubscriptionModal } from "@/features/subscriptions/store/use-subscription-modal";
+
 import {
   Dialog,
   DialogTitle,

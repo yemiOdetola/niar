@@ -2,7 +2,6 @@ import Stripe from "stripe";
 import { Hono } from "hono";
 import { eq } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
-
 import { checkIsActive } from "@/features/subscriptions/lib";
 
 import { stripe } from "@/lib/stripe";
@@ -50,6 +49,7 @@ const app = new Hono()
       .where(eq(subscriptions.userId, auth.token.id));
 
     const active = checkIsActive(subscription);
+    // const active = false;
 
     return c.json({
       data: {
@@ -98,6 +98,7 @@ const app = new Hono()
       const signature = c.req.header("Stripe-Signature") as string;
 
       let event: Stripe.Event;
+      // let event: any;
 
       try {
         event = stripe.webhooks.constructEvent(
@@ -110,6 +111,7 @@ const app = new Hono()
       }
 
       const session = event.data.object as Stripe.Checkout.Session;
+      // const session = event.data.object;
 
       if (event.type === "checkout.session.completed") {
         const subscription = await stripe.subscriptions.retrieve(

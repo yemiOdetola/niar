@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useConfirm } from "@/hooks/use-confirm";
 import ToolSidebarHeader from "./tool-sidebar-header";
 import { Editor, ActiveTool } from "../types";
+import { usePaywall } from "@/features/subscriptions/hooks/use-paywall";
 
 interface TemplateSidebarProps {
   editor: Editor | undefined;
@@ -23,7 +24,7 @@ export const TemplateSidebar = ({
   activeTool,
   onChangeActiveTool,
 }: TemplateSidebarProps) => {
-  // const { shouldBlock, triggerPaywall } = usePaywall();
+  const { shouldBlock, triggerPaywall } = usePaywall();
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
@@ -40,14 +41,14 @@ export const TemplateSidebar = ({
   };
 
   const onClick = async (template: ResponseType["data"][0]) => {
-    // if (template.isPro && shouldBlock) {
-    //   triggerPaywall();
-    //   return;
-    // }
-    // const ok = await confirm();
-    // if (ok) {
-    //   editor?.loadJson(template.json);
-    // }
+    if (template.isPro && shouldBlock) {
+      triggerPaywall();
+      return;
+    }
+    const ok = await confirm();
+    if (ok) {
+      editor?.loadJson(template.json);
+    }
   };
 
   return (

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+import { useFailModal } from "@/features/subscriptions/store/use-fail-modal";
 
 import {
   Dialog,
@@ -13,11 +14,10 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useSuccessModal } from "@/hooks/subscriptions/use-success-modal";
 
-export const SuccessModal = () => {
+export const FailModal = () => {
   const router = useRouter();
-  const { isOpen, onClose } = useSuccessModal();
+  const { isOpen, onClose } = useFailModal();
 
   const handleClose = () => {
     router.replace("/");
@@ -35,10 +35,10 @@ export const SuccessModal = () => {
             height={36}
           />
           <DialogTitle className="text-center">
-            Subscription successfull!
+            Something went wrong
           </DialogTitle>
           <DialogDescription className="text-center">
-            You have successfully subscribed to our service
+            We could not process your payment
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="pt-2 mt-4 gap-y-2">

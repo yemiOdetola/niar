@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Editor, ActiveTool } from "../types";
 import ToolSidebarHeader from "./tool-sidebar-header";
 import { useGenerateImage } from "@/hooks/ai/use-generate-image";
+import { usePaywall } from "@/features/subscriptions/hooks/use-paywall";
 
 interface AiSidebarProps {
   editor: Editor | undefined;
